@@ -4,37 +4,390 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>최윤석 & 정희윤</title>
+  <!-- Open Graph for link preview -->
   <meta property="og:title" content="최윤석 & 정희윤" />
-  <meta property="og:description" content="모바일 청첩장 오픈 준비중 ..." />
+  <meta property="og:description" content="2026년 6월 27 토요일 17:00, 더컨벤션 신사. 소중한 당신을 초대합니다." />
+  <meta property="og:image" content="card.png" />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#111827" />
+
+  <!-- Tailwind (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #fafaf9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    html { scroll-behavior: smooth; }
+    table td { height: 34px; vertical-align: middle; }
+    .fade-in { animation: fade 1.2s ease both; }
+    @keyframes fade { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+    @keyframes pulse-glow { 0%,100%{filter:drop-shadow(0 0 6px rgba(242,61,127,0.5))} 50%{filter:drop-shadow(0 0 20px rgba(242,61,127,1))} }
+    #day27 { animation: pulse-glow 2s ease-in-out infinite; }
+    /* Gallery overlay */
+    @keyframes slideInRight { from{transform:translateX(100%)} to{transform:translateX(0)} }
+    @keyframes slideOutRight { from{transform:translateX(0)} to{transform:translateX(100%)} }
+    #galleryOverlay { transform: translateX(100%); }
+    #galleryOverlay.open { animation: slideInRight 0.35s ease forwards; }
+    #galleryOverlay.closing { animation: slideOutRight 0.35s ease forwards; }
+    /* Lightbox */
+    #lightbox { opacity:0; pointer-events:none; transition:opacity 0.25s ease; }
+    #lightbox.open { opacity:1; pointer-events:auto; }
+    /* Gallery notice bar */
+    @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+    @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+    #galleryNotice { animation: slideDown 0.4s ease 0.35s both; }
+    #devNotice { animation: slideDown 0.4s ease both, fadeOut 0.5s ease 5s forwards; }
+    /* Music toggle */
+    #musicBtn { position:fixed; bottom:20px; right:20px; z-index:200; width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,0.01); color:#ccc; font-size:30px; border:none; backdrop-filter:blur(4px); cursor:pointer; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    #musicBtn.muted::after { content:''; position:absolute; width:2px; height:60%; background:white; transform:rotate(45deg); border-radius:1px; }
+    .heart {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+      width: 34px; height: 35px; cursor: pointer;
     }
-    img {
-      max-width: 90%;
-      max-height: 70vh;
-      border: none;
-      outline: none;
+    .heart svg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     }
-    p {
-      margin-top: 24px;
-      font-size: 1.1rem;
-      color: #57534e;
-      letter-spacing: 0.05em;
+    .heart span {
+      position: relative; z-index: 1;
+      color: white; font-weight: 700; font-size: 13px;
+      margin-top: 1px;
     }
   </style>
 </head>
-<body>
-  <img src="card.png" alt="청첩장" />
-  <p>모바일 청첩장 오픈 준비중 ...</p>
+<body class="bg-stone-50 text-stone-800 max-w-screen-sm mx-auto">
+
+<div id="devNotice" class="fixed top-2 left-0 right-0 mx-auto w-fit z-[300] px-4 py-2.5 rounded-xl bg-stone-800 text-white text-xs text-center flex items-center justify-center gap-2 pointer-events-none"><span>🔨</span><span>모바일 청첩장 개발 중 ...</span></div>
+
+<!-- Info -->
+<div id="info" class="grid grid-cols-2 px-6 pt-2 pb-2" style="background:linear-gradient(to bottom, #fafaf9 0%, rgba(175,168,169,0.8) 100%)">
+  <p class="uppercase tracking-[0.3em] text-[10px] text-stone-500 text-left self-start">Wedding Invitation</p>
+  <h1 class="text-md font-semibold text-stone-800 text-right self-start">최윤석 & 정희윤</h1>
+</div>
+
+<!-- Hero -->
+<header>
+  <img src="card.png" alt="최윤석 정희윤 청첩장" class="w-full block"/>
+</header>
+
+<!-- Sticky Nav -->
+<nav class="sticky top-0 z-50 bg-stone-50/30 backdrop-blur-md py-2 flex justify-center gap-2">
+  <a href="#" onclick="openGallery();return false" class="px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs">갤러리</a>
+  <a href="#map" class="px-3 py-1.5 rounded-lg bg-stone-200 text-stone-900 text-xs">오시는 길</a>
+  <a href="#accounts" class="px-3 py-1.5 rounded-lg bg-stone-200 text-stone-900 text-xs">마음 전하실 곳</a>
+</nav>
+
+<div class="flex flex-col items-center text-center px-6 pt-4 pb-2">
+  <p class="text-base text-stone-800">2026. 06. 27 (토) 17:00</p>
+  <p class="mt-1 text-sm text-stone-500">서울 더컨벤션 신사 그랜드볼룸</p>
+  <div id="dday" class="mt-3 text-sm text-stone-500"></div>
+</div>
+
+<!-- Intro -->
+<section class="max-w-xl mx-auto px-6 py-12 pb-20 fade-in">
+  <div class="relative px-6 py-20 mb-8">
+    <!-- 방사형 그라데이션: ellipse = 타원(circle로 바꾸면 원형) / 0.3 = 가운데 투명도(0~1) / 70% = 퍼지는 범위 / -inset-y-16 = 위아래 영역 확장 -->
+    <div class="absolute -inset-y-16 inset-x-0 rounded-2xl" style="background: radial-gradient(ellipse 60% 60% at center, rgba(255,105,180,0.2) 0%, transparent 60%);"></div>
+    <p class="relative text-center text-sm leading-[2.8] text-stone-600">
+      서로의 이름을 부르는 것만으로도<br>
+      사랑의 깊이를 확인할 수 있는 두 사람이<br>
+      꽃과 나무처럼 걸어와서<br>
+      서로의 모든 것이 되기 위해<br>
+      오랜 기다림 끝에 혼례식을 치르는 날<br>
+      세상은 더욱 아름다워라<br><br>
+    </p>
+    <p class="relative mt-4 text-center text-xs text-stone-400">- 이해인, &lt;사랑의 사람들이여&gt;</p>
+  </div>
+  <p class="text-center text-sm leading-7 text-stone-600 mt-20 mb-12"><b>저희 두 사람, 부부의 연을 맺어 하나가 되고자 합니다.<br>귀한 발걸음으로 자리를 빛내주세요.</b></p>
+</section>
+
+<!-- Schedule & Place -->
+<section class="max-w-xl mx-auto px-6 pt-20 pb-2 fade-in">
+  <h2 class="text-center text-xl font-semibold">Save the Date</h2>
+</section>
+
+<!-- Calendar -->
+<section class="max-w-[300px] mx-auto px-6 pt-2 pb-8">
+  <table class="w-full text-center text-sm" style="table-layout:fixed">
+    <thead>
+      <tr><th colspan="7" class="pb-3 text-base font-semibold tracking-wide">2026. 6</th></tr>
+      <tr class="text-stone-400 text-xs">
+        <th class="py-1 text-red-400">일</th><th class="py-1">월</th><th class="py-1">화</th><th class="py-1">수</th><th class="py-1">목</th><th class="py-1">금</th><th class="py-1 text-blue-400">토</th>
+      </tr>
+    </thead>
+    <tbody class="text-stone-600" style="border-top:8px solid transparent">
+      <tr><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td class="text-blue-400">6</td></tr>
+      <tr><td class="text-red-400">7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td class="text-blue-400">13</td></tr>
+      <tr><td class="text-red-400">14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td class="text-blue-400">20</td></tr>
+      <tr><td class="text-red-400">21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td><div id="day27" class="heart"><svg viewBox="0 0 32 30" xmlns="http://www.w3.org/2000/svg"><path d="M16 28s-1.5-1-3.5-2.7C6.5 20 1 15.2 1 9.5 1 5.4 4.4 2 8.5 2c2.5 0 5 1.2 6.5 3.2h2C18.5 3.2 21 2 23.5 2 27.6 2 31 5.4 31 9.5c0 5.7-5.5 10.5-11.5 15.8C17.5 27 16 28 16 28z" fill="#F23D7F"/></svg><span>27</span><span style="position:absolute;left:100%;top:60%;transform:translateY(-50%);font-size:10px;color:#78716c;white-space:nowrap;margin-left:1.5px">5 PM</span></div></td></tr>
+      <tr><td colspan="7" style="padding:0;height:0;line-height:0"><div id="calendarAction" style="max-height:0;overflow:hidden;transition:max-height 0.4s ease"><div class="flex justify-center gap-3 py-3"><a id="icsBtn2" href="#" class="px-4 py-2 rounded-xl bg-stone-900 text-white text-xs">캘린더에 추가 (ICS)</a><a class="px-4 py-2 rounded-xl bg-stone-200 text-stone-900 text-xs" target="_blank" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=%EC%B5%9C%EC%9C%A4%EC%84%9D+%26+%EC%A0%95%ED%9D%AC%EC%9C%A4+%EA%B2%B0%ED%98%BC%EC%8B%9D&dates=20260627T080000Z/20260627T100000Z&details=%EC%86%8C%EC%A4%91%ED%95%9C+%EB%8B%B9%EC%8B%A0%EC%9D%84+%EC%B4%88%EB%8C%80%ED%95%A9%EB%8B%88%EB%8B%A4.&location=%EC%84%9C%EC%9A%B8+%EA%B0%95%EB%82%A8%EA%B5%AC+%EA%B0%95%EB%82%A8%EB%8C%80%EB%A1%9C+652+%EB%8D%94%EC%BB%A8%EB%B2%A4%EC%85%98+%EC%8B%A0%EC%82%AC">구글 캘린더</a></div></div></td></tr>
+      <tr><td class="text-red-400">28</td><td>29</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  <p class="text-center text-[10px] text-stone-400 mt-2">" 일정을 눌러 캘린더에 저장하세요 "</p>
+</section>
+<!--
+<section class="max-w-xl mx-auto px-6">
+  <div class="bg-white rounded-2xl shadow-sm p-5">
+    <p class="text-sm text-stone-500">일시</p>
+    <p class="mt-1">2026년 6월 27일 (토) 오후 5시</p>
+  </div>
+</section>시
+-->
+<!-- Map (Embedded) -->
+<section id="map" class="bg-stone-50 pt-20 pb-12">
+  <div class="max-w-xl mx-auto px-6">
+    <h2 class="text-center text-xl font-semibold">오시는 길</h2>
+    <div class="mt-6 overflow-hidden rounded-2xl shadow-sm">
+      <iframe title="venue map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3164.5067599983886!2d127.0190616!3d37.5195499!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca3080031aca3%3A0x21f1f9d39f1a6c79!2z642U7Luo67Kk7IWYIOyLoOyCrA!5e0!3m2!1sko!2skr!4v1759234585443!5m2!1sko!2skr" width="100%" height="280" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <p class="mt-3 text-center text-xs text-stone-600">서울시 강남구 강남대로 652 더컨벤션 신사 4층 그랜드 볼룸</p>
+    <div class="mt-6 bg-white rounded-2xl shadow-sm p-5">
+      <p class="text-sm text-stone-500">주차/대중교통</p>
+      <ul class="mt-1 list-disc list-inside text-sm leading-7">
+        <li>지하철 신사역 3번 출구 도보 7분</li>
+        <li>예식장 유료주차 (2시간 무료)</li>
+      </ul>
+    </div>
+    <div class="mt-4 flex justify-center gap-3">
+      <a class="px-5 py-3 rounded-xl bg-green-500 text-white text-sm font-medium" target="_blank" href="https://naver.me/G3861Qy4">네이버 지도</a>
+      <a class="px-5 py-3 rounded-xl bg-yellow-400 text-stone-900 text-sm font-medium" target="_blank" href="https://kko.to/0rG6GlfdZ0">카카오맵</a>
+      <a class="px-5 py-3 rounded-xl bg-sky-500 text-white text-sm font-medium" href="tmap://route?goalname=%EB%8D%94%EC%BB%A8%EB%B2%A4%EC%85%98+%EC%8B%A0%EC%82%AC&goalx=127.0190616&goaly=37.5195499">T map</a>
+    </div>
+  </div>
+</section>
+
+<!-- Accounts -->
+<section id="accounts" class="bg-stone-50 pt-28 pb-20">
+  <div class="max-w-xl mx-auto px-6">
+    <h2 class="text-center text-xl font-semibold">마음 전하실 곳</h2>
+    <div class="mt-10 grid grid-cols-1 gap-4">
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <p class="text-sm text-stone-500">신랑측</p>
+        <div class="mt-2 space-y-2 text-sm">
+          <div class="flex items-center justify-between">
+            <span><b>최윤석</b>&emsp;우리 1004-045-799347)</span>
+            <button class="copy-btn underline text-xs" data-copy="우리 1004-045-799347">복사</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span><b>최희상</b>&emsp;국민 024-21-0922-595</span>
+            <button class="copy-btn underline text-xs" data-copy="국민 024-21-0922-595">복사</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span><b>이지연</b>&emsp;신한 381-12-067563</span>
+            <button class="copy-btn underline text-xs" data-copy="신한 381-12-067563">복사</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm p-5">
+        <p class="text-sm text-stone-500">신부측</p>
+        <div class="mt-2 space-y-2 text-sm">
+          <div class="flex items-center justify-between">
+            <span><b>정희윤</b>&emsp;우리 1002-854-937578</span>
+            <button class="copy-btn underline text-xs" data-copy="우리 1002-854-937578">복사</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span><b>정용석</b>&emsp;우리 110-007-777035</span>
+            <button class="copy-btn underline text-xs" data-copy="우리 110-007-777035">복사</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <span><b>최성희</b>&emsp;국민 823301-01-472235</span>
+            <button class="copy-btn underline text-xs" data-copy="국민 823301-01-472235">복사</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="py-10 text-center text-xs text-stone-400 space-y-1">
+  <p>윤석 & 희윤, 서로 아끼며 행복하게 살겠습니다!</p>
+  <p class="text-[8px]">&copy; 2026 Heeyoon Jeong. All rights reserved.</p>
+</footer>
+
+<!-- Background music -->
+<audio id="bgmAudio" src="bgm.mp3" loop preload="auto"></audio>
+
+<!-- Music toggle button -->
+<button id="musicBtn" class="muted" aria-label="음악 토글">♪</button>
+
+<!-- Gallery Overlay -->
+<div id="galleryOverlay" class="fixed inset-0 z-[100] bg-stone-50 overflow-y-auto" style="display:none">
+  <div class="max-w-screen-sm mx-auto min-h-screen">
+    <div id="galleryNotice" class="mx-3 mt-2 mb-0 px-4 py-2.5 rounded-xl bg-stone-800 text-white text-xs text-center flex items-center justify-center gap-2">
+      <span>📷</span><span>사진 준비 중 ...</span>
+    </div>
+    <div class="flex items-center justify-between px-6 py-4">
+      <a href="#" onclick="closeGallery();return false" class="text-sm text-stone-500">&larr; 돌아가기</a>
+      <h1 class="text-lg font-semibold text-stone-800">Moments!</h1>
+      <span class="w-16"></span>
+    </div>
+    <div class="px-3 pb-10 grid grid-cols-2 gap-2" id="galleryGrid">
+      <img onclick="openLightbox(0)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=800&auto=format&fit=crop" alt="gallery1"/>
+      <img onclick="openLightbox(1)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop" alt="gallery2"/>
+      <img onclick="openLightbox(2)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop" alt="gallery3"/>
+      <img onclick="openLightbox(3)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop" alt="gallery4"/>
+      <img onclick="openLightbox(4)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop" alt="gallery5"/>
+      <img onclick="openLightbox(5)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1542147619-18d02d142e8a?q=80&w=800&auto=format&fit=crop" alt="gallery6"/>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center">
+  <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl z-10">&times;</button>
+  <button onclick="prevPhoto()" class="absolute left-2 top-1/2 -translate-y-1/2 text-white text-4xl z-10 p-2">&#8249;</button>
+  <button onclick="nextPhoto()" class="absolute right-2 top-1/2 -translate-y-1/2 text-white text-4xl z-10 p-2">&#8250;</button>
+  <img id="lightboxImg" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" src="" alt="photo"/>
+</div>
+
+<script>
+  // D-DAY countdown (set to local time 2026-06-27 17:00 KST)
+  const ddayEl = document.getElementById('dday');
+  const target = new Date('2026-06-27T17:00:00+09:00').getTime();
+  const pad = (n)=> String(n).padStart(2,'0');
+  function tick(){
+    const now = Date.now();
+    const diff = Math.max(0, target - now);
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    const mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const secs = Math.floor((diff % (1000*60)) / 1000);
+    ddayEl.textContent = `D-${days}  ${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // 사용자가 먼저 스크롤하면 자동 스크롤 취소
+  let userScrolled = false;
+  window.addEventListener('scroll', () => { userScrolled = true; }, { once: true });
+  window.addEventListener('touchmove', () => { userScrolled = true; }, { once: true });
+
+  // 2초 후 사진 아래로 천천히 스크롤
+  setTimeout(() => {
+    if (userScrolled) return;
+    const target = document.getElementById('info').offsetTop;
+    const start = window.scrollY;
+    const distance = target - start;
+    const duration = 2000;
+    let startTime = null;
+    function step(time) {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      window.scrollTo(0, start + distance * ease);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }, 2000);
+
+  // Copy buttons (phone/account)
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      try{ await navigator.clipboard.writeText(btn.dataset.copy); btn.textContent='복사됨'; setTimeout(()=>btn.textContent='복사',1500);}catch{alert('복사 실패')}
+    })
+  })
+
+  // 27일 클릭 시 일정 추가 버튼 토글 (애니메이션)
+  const calRow = document.getElementById('calendarAction');
+  let calOpen = false;
+  document.getElementById('day27').addEventListener('click', () => {
+    calOpen = !calOpen;
+    calRow.style.maxHeight = calOpen ? '60px' : '0';
+  });
+
+  // ICS 다운로드
+  function downloadICS(e) {
+    e.preventDefault();
+    const now = new Date(); const stamp = now.toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//heeyoon//wedding//KR\nBEGIN:VEVENT\nUID:${Date.now()}@heeyoon-wedding\nDTSTAMP:${stamp}\nDTSTART:20260627T080000Z\nDTEND:20260627T100000Z\nSUMMARY:최윤석 & 정희윤 결혼식\nLOCATION:서울 강남구 더컨벤션 신사 그랜드볼룸\nDESCRIPTION:소중한 당신을 초대합니다.\nEND:VEVENT\nEND:VCALENDAR`;
+    const blob = new Blob([ics], {type:'text/calendar'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'wedding.ics'; a.click();
+    URL.revokeObjectURL(url);
+  }
+  document.getElementById('icsBtn2').addEventListener('click', downloadICS);
+
+  // ── Gallery Overlay ──
+  const galleryOverlay = document.getElementById('galleryOverlay');
+  let savedScrollY = 0;
+
+  function openGallery() {
+    savedScrollY = window.scrollY;
+    galleryOverlay.style.display = '';
+    galleryOverlay.className = 'fixed inset-0 z-[100] bg-stone-50 overflow-y-auto open';
+    document.body.style.overflow = 'hidden';
+    galleryOverlay.scrollTop = 0;
+  }
+
+  function closeGallery() {
+    galleryOverlay.classList.remove('open');
+    galleryOverlay.classList.add('closing');
+    galleryOverlay.addEventListener('animationend', function handler() {
+      galleryOverlay.removeEventListener('animationend', handler);
+      galleryOverlay.style.display = 'none';
+      galleryOverlay.className = 'fixed inset-0 z-[100] bg-stone-50 overflow-y-auto';
+      document.body.style.overflow = '';
+      window.scrollTo(0, savedScrollY);
+    });
+  }
+
+  // ── Lightbox ──
+  const galleryPhotos = [
+    'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1542147619-18d02d142e8a?q=80&w=800&auto=format&fit=crop'
+  ];
+  let currentPhoto = 0;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+
+  function openLightbox(index) {
+    currentPhoto = index;
+    lightboxImg.src = galleryPhotos[currentPhoto];
+    lightbox.classList.add('open');
+  }
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+  }
+  function prevPhoto() {
+    currentPhoto = (currentPhoto - 1 + galleryPhotos.length) % galleryPhotos.length;
+    lightboxImg.src = galleryPhotos[currentPhoto];
+  }
+  function nextPhoto() {
+    currentPhoto = (currentPhoto + 1) % galleryPhotos.length;
+    lightboxImg.src = galleryPhotos[currentPhoto];
+  }
+
+  // Touch swipe for lightbox
+  let touchStartX = 0;
+  lightbox.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+  lightbox.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) prevPhoto(); else nextPhoto();
+    }
+  });
+
+  // Close lightbox on background click
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+  // ── Background Music ──
+  const bgmAudio = document.getElementById('bgmAudio');
+  let musicPlaying = false;
+  const musicBtn = document.getElementById('musicBtn');
+
+  musicBtn.addEventListener('click', () => {
+    if (musicPlaying) {
+      bgmAudio.pause();
+      musicPlaying = false;
+      musicBtn.classList.add('muted');
+    } else {
+      bgmAudio.play();
+      musicPlaying = true;
+      musicBtn.classList.remove('muted');
+    }
+  });
+
+</script>
 </body>
 </html>
