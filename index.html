@@ -12,7 +12,7 @@
   <meta name="theme-color" content="#111827" />
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Allura&family=Noto+Serif+KR&family=Playfair+Display&family=IBM+Plex+Sans+KR:wght@300&family=Gowun+Batang&display=swap" rel="stylesheet">
   <!-- Tailwind (Play CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -60,7 +60,7 @@
 <!-- Info -->
 <div id="info" class="grid grid-cols-2 px-6 pt-2 pb-2" style="background:linear-gradient(to bottom, #fafaf9 0%, rgba(175,168,169,0.8) 100%)">
   <p class="uppercase tracking-[0.3em] text-[10px] text-stone-500 text-left self-start">Wedding Invitation</p>
-  <h1 class="text-md font-semibold text-stone-800 text-right self-start">최윤석 & 정희윤</h1>
+  <h1 class="text-md font-semibold text-stone-500 text-right self-start" style="font-family:'Gowun Batang',serif">최윤석 ♥ 정희윤</h1>
 </div>
 
 <!-- Hero -->
@@ -76,9 +76,9 @@
 </nav>
 
 <div class="flex flex-col items-center text-center px-6 pt-4 pb-2">
-  <p class="text-base text-stone-800">2026. 06. 27 (토) 17:00</p>
-  <p class="mt-1 text-sm text-stone-500">서울 더컨벤션 신사 그랜드볼룸</p>
-  <div id="dday" class="mt-3 text-sm text-stone-500"></div>
+  <p class="text-lg text-stone-800">2026. 06. 27 (토) 17:00</p>
+  <p class="mt-1 text-base text-stone-500">서울 더컨벤션 신사 그랜드볼룸</p>
+  <div id="dday" class="mt-3 text-2xl text-stone-500" style="font-family:'Playfair Display',serif"></div>
 </div>
 
 <!-- Intro -->
@@ -86,7 +86,7 @@
   <div class="relative px-6 py-20 mb-8">
     <!-- 방사형 그라데이션: ellipse = 타원(circle로 바꾸면 원형) / 0.3 = 가운데 투명도(0~1) / 70% = 퍼지는 범위 / -inset-y-16 = 위아래 영역 확장 -->
     <div class="absolute -inset-y-16 inset-x-0 rounded-2xl" style="background: radial-gradient(ellipse 60% 60% at center, rgba(255,105,180,0.2) 0%, transparent 60%);"></div>
-    <p class="relative text-center text-sm leading-[2.8] text-stone-600">
+    <p class="relative text-center text-sm leading-[2.8] text-stone-600" style="font-family:'Noto Serif KR',serif">
       서로의 이름을 부르는 것만으로도<br>
       사랑의 깊이를 확인할 수 있는 두 사람이<br>
       꽃과 나무처럼 걸어와서<br>
@@ -96,7 +96,7 @@
     </p>
     <p class="relative mt-4 text-center text-xs text-stone-400">- 이해인, &lt;사랑의 사람들이여&gt;</p>
   </div>
-  <p class="text-center text-sm leading-7 text-stone-600 mt-20 mb-12"><b>" 저희 두 사람, 부부의 연을 맺어 하나가 되고자 합니다.<br>귀한 발걸음으로 자리를 빛내주세요. "</b></p>
+  <p class="text-center text-sm leading-7 text-stone-600 mt-20 mb-12" style="font-family:'IBM Plex Sans KR',sans-serif;font-weight:300"><b>" 저희 두 사람, 부부의 연을 맺어 하나가 되고자 합니다.<br>귀한 발걸음으로 자리를 빛내주세요. "</b></p>
 </section>
 
 <!-- Schedule & Place -->
@@ -108,7 +108,7 @@
 <section class="max-w-[360px] mx-auto px-6 pt-2 pb-8">
   <table class="w-full text-center text-base" style="table-layout:fixed">
     <thead>
-      <tr><th colspan="7" class="pb-3 text-lg font-semibold tracking-wide">2026. 6</th></tr>
+      <tr><th colspan="7" class="pb-3 text-xl font-semibold tracking-wide">2026. 6</th></tr>
       <tr class="text-stone-400 text-sm">
         <th class="py-1 text-red-400">일</th><th class="py-1">월</th><th class="py-1">화</th><th class="py-1">수</th><th class="py-1">목</th><th class="py-1">금</th><th class="py-1 text-blue-400">토</th>
       </tr>
@@ -161,36 +161,54 @@
     <h2 class="text-center text-xl font-semibold">마음 전하실 곳</h2>
     <div class="mt-10 grid grid-cols-1 gap-4">
       <div class="bg-white rounded-2xl shadow-sm p-5">
-        <p class="text-sm text-stone-500">신랑측</p>
-        <div class="mt-2 space-y-4 text-sm">
-          <div class="flex items-center justify-between">
-            <span><b>최윤석</b>&emsp;우리 1004-045-799347</span>
-            <button class="copy-btn underline text-xs" data-copy="우리 1004-045-799347">복사</button>
+        <p class="text-md text-stone-500 text-center">🤵 신랑측 💐</p>
+        <div class="mt-5 space-y-5 text-sm">
+          <div class="flex justify-between">
+            <b class="shrink-0">최윤석</b>
+            <div class="text-right">
+              <p>010-1234-5678 <button class="copy-btn underline text-xs" data-copy="010-1234-5678">복사</button></p>
+              <p class="text-stone-400">우리 1004-045-799347 <button class="copy-btn underline text-xs" data-copy="우리 1004-045-799347">복사</button></p>
+            </div>
           </div>
-          <div class="flex items-center justify-between">
-            <span><b>최희상</b>&emsp;국민 024-21-0922-595</span>
-            <button class="copy-btn underline text-xs" data-copy="국민 024-21-0922-595">복사</button>
+          <div class="flex justify-between">
+            <b class="shrink-0">최희상</b>
+            <div class="text-right">
+              <p>010-1234-5678 <button class="copy-btn underline text-xs" data-copy="010-1234-5678">복사</button></p>
+              <p class="text-stone-400">국민 024-21-0922-595 <button class="copy-btn underline text-xs" data-copy="국민 024-21-0922-595">복사</button></p>
+            </div>
           </div>
-          <div class="flex items-center justify-between">
-            <span><b>이지연</b>&emsp;신한 381-12-067563</span>
-            <button class="copy-btn underline text-xs" data-copy="신한 381-12-067563">복사</button>
+          <div class="flex justify-between">
+            <b class="shrink-0">이지연</b>
+            <div class="text-right">
+              <p>010-1234-5678 <button class="copy-btn underline text-xs" data-copy="010-1234-5678">복사</button></p>
+              <p class="text-stone-400">신한 381-12-067563 <button class="copy-btn underline text-xs" data-copy="신한 381-12-067563">복사</button></p>
+            </div>
           </div>
         </div>
       </div>
       <div class="bg-white rounded-2xl shadow-sm p-5">
-        <p class="text-sm text-stone-500">신부측</p>
-        <div class="mt-2 space-y-4 text-sm">
-          <div class="flex items-center justify-between">
-            <span><b>정희윤</b>&emsp;우리 1002-854-937578</span>
-            <button class="copy-btn underline text-xs" data-copy="우리 1002-854-937578">복사</button>
+        <p class="text-md text-stone-500 text-center">👰 신부측 💍</p>
+        <div class="mt-5 space-y-5 text-sm">
+          <div class="flex justify-between">
+            <b class="shrink-0">정희윤</b>
+            <div class="text-right">
+              <p>010-7512-6890 <button class="copy-btn underline text-xs" data-copy="01075126890">복사</button></p>
+              <p class="text-stone-400">우리 1002-854-937578 <button class="copy-btn underline text-xs" data-copy="우리 1002-854-937578">복사</button></p>
+            </div>
           </div>
-          <div class="flex items-center justify-between">
-            <span><b>정용석</b>&emsp;우리 110-007-777035</span>
-            <button class="copy-btn underline text-xs" data-copy="우리 110-007-777035">복사</button>
+          <div class="flex justify-between">
+            <b class="shrink-0">정용석</b>
+            <div class="text-right">
+              <p>010-9371-5115 <button class="copy-btn underline text-xs" data-copy="01093715115">복사</button></p>
+              <p class="text-stone-400">우리 110-007-777035 <button class="copy-btn underline text-xs" data-copy="우리 110-007-777035">복사</button></p>
+            </div>
           </div>
-          <div class="flex items-center justify-between">
-            <span><b>최성희</b>&emsp;국민 823301-01-472235</span>
-            <button class="copy-btn underline text-xs" data-copy="국민 823301-01-472235">복사</button>
+          <div class="flex justify-between">
+            <b class="shrink-0">최성희</b>
+            <div class="text-right">
+              <p>010-8371-6946 <button class="copy-btn underline text-xs" data-copy="01083716946">복사</button></p>
+              <p class="text-stone-400">국민 823301-01-472235 <button class="copy-btn underline text-xs" data-copy="국민 823301-01-472235">복사</button></p>
+            </div>
           </div>
         </div>
       </div>
@@ -378,7 +396,19 @@
   let musicPlaying = false;
   const musicBtn = document.getElementById('musicBtn');
 
-  musicBtn.addEventListener('click', () => {
+  // 첫 클릭 시 자동 재생 (click만 사용 — touchstart 제외로 모바일 중복 방지)
+  function startOnFirstClick() {
+    if (!musicPlaying) {
+      bgmAudio.play();
+      musicPlaying = true;
+      musicBtn.classList.remove('muted');
+    }
+    document.removeEventListener('click', startOnFirstClick);
+  }
+  document.addEventListener('click', startOnFirstClick);
+
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (musicPlaying) {
       bgmAudio.pause();
       musicPlaying = false;
