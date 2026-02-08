@@ -64,8 +64,15 @@
 </div>
 
 <!-- Hero -->
-<header>
-  <img src="card.png" alt="최윤석 정희윤 청첩장" class="w-full block"/>
+<header class="relative overflow-hidden">
+  <div id="heroSlider" class="flex transition-transform duration-300 ease-in-out" style="width:200%">
+    <img src="card.png" alt="최윤석 정희윤 청첩장" class="w-1/2 shrink-0 block"/>
+    <img src="resources/main.png" alt="최윤석 정희윤" class="w-1/2 shrink-0 block"/>
+  </div>
+  <div id="heroDots" class="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-white opacity-90"></span>
+    <span class="w-2 h-2 rounded-full bg-white opacity-40"></span>
+  </div>
 </header>
 
 <!-- Sticky Nav -->
@@ -239,12 +246,8 @@
       <span class="w-16"></span>
     </div>
     <div class="px-3 pb-10 grid grid-cols-2 gap-2" id="galleryGrid">
-      <img onclick="openLightbox(0)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=800&auto=format&fit=crop" alt="gallery1"/>
-      <img onclick="openLightbox(1)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop" alt="gallery2"/>
-      <img onclick="openLightbox(2)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop" alt="gallery3"/>
-      <img onclick="openLightbox(3)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop" alt="gallery4"/>
-      <img onclick="openLightbox(4)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop" alt="gallery5"/>
-      <img onclick="openLightbox(5)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="https://images.unsplash.com/photo-1542147619-18d02d142e8a?q=80&w=800&auto=format&fit=crop" alt="gallery6"/>
+      <img onclick="openLightbox(0)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic1.png" alt="gallery1"/>
+      <img onclick="openLightbox(1)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic2.png" alt="gallery2"/>
     </div>
   </div>
 </div>
@@ -324,6 +327,39 @@
   }
   document.getElementById('icsBtn2').addEventListener('click', downloadICS);
 
+  // ── Hero Slider ──
+  const heroSlider = document.getElementById('heroSlider');
+  const heroDots = document.querySelectorAll('#heroDots span');
+  let heroIndex = 0;
+  let heroStartX = 0;
+  let heroStartY = 0;
+  let heroDragging = false;
+
+  heroSlider.addEventListener('touchstart', (e) => {
+    heroStartX = e.touches[0].clientX;
+    heroStartY = e.touches[0].clientY;
+    heroDragging = true;
+    heroSlider.style.transition = 'none';
+  });
+  heroSlider.addEventListener('touchmove', (e) => {
+    if (!heroDragging) return;
+    const dx = e.touches[0].clientX - heroStartX;
+    const dy = e.touches[0].clientY - heroStartY;
+    if (Math.abs(dx) > Math.abs(dy)) e.preventDefault();
+    const offset = -heroIndex * 50 + (dx / heroSlider.parentElement.offsetWidth) * 50;
+    heroSlider.style.transform = `translateX(${offset}%)`;
+  }, { passive: false });
+  heroSlider.addEventListener('touchend', (e) => {
+    if (!heroDragging) return;
+    heroDragging = false;
+    heroSlider.style.transition = 'transform 0.3s ease-in-out';
+    const dx = e.changedTouches[0].clientX - heroStartX;
+    if (dx < -50 && heroIndex < 1) heroIndex = 1;
+    else if (dx > 50 && heroIndex > 0) heroIndex = 0;
+    heroSlider.style.transform = `translateX(${-heroIndex * 50}%)`;
+    heroDots.forEach((d, i) => d.style.opacity = i === heroIndex ? '0.9' : '0.4');
+  });
+
   // ── Gallery Overlay ──
   const galleryOverlay = document.getElementById('galleryOverlay');
   let savedScrollY = 0;
@@ -350,12 +386,8 @@
 
   // ── Lightbox ──
   const galleryPhotos = [
-    'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1542147619-18d02d142e8a?q=80&w=800&auto=format&fit=crop'
+    'resources/pic1.png',
+    'resources/pic2.png'
   ];
   let currentPhoto = 0;
   const lightbox = document.getElementById('lightbox');
