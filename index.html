@@ -248,6 +248,9 @@
     <div class="px-3 pb-10 grid grid-cols-2 gap-2" id="galleryGrid">
       <img onclick="openLightbox(0)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic1.png" alt="gallery1"/>
       <img onclick="openLightbox(1)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic2.png" alt="gallery2"/>
+      <img onclick="openLightbox(2)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic3.png" alt="gallery3"/>
+      <img onclick="openLightbox(3)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic4.png" alt="gallery4"/>
+      <img onclick="openLightbox(4)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic5.png" alt="gallery5"/>
     </div>
   </div>
 </div>
@@ -415,7 +418,10 @@
   // ── Lightbox ──
   const galleryPhotos = [
     'resources/pic1.png',
-    'resources/pic2.png'
+    'resources/pic2.png',
+    'resources/pic3.png',
+    'resources/pic4.png',
+    'resources/pic5.png'
   ];
   let currentPhoto = 0;
   const lightbox = document.getElementById('lightbox');
