@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>갤러리 관리</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body class="bg-stone-100 text-stone-800 min-h-screen">
+
+<div class="max-w-screen-sm mx-auto px-4 py-8">
+
+  <!-- ── 로그인 화면 ── -->
+  <div id="loginView" style="display:none">
+    <h1 class="text-xl font-semibold text-center mb-6">갤러리 관리자 로그인</h1>
+    <div class="bg-white rounded-2xl shadow-sm p-6 space-y-3">
+      <input id="email" type="email" inputmode="email" autocomplete="username"
+             placeholder="이메일" class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm" />
+      <input id="password" type="password" autocomplete="current-password"
+             placeholder="비밀번호" class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm" />
+      <button id="loginBtn" class="w-full bg-stone-800 text-white rounded-lg py-2.5 text-sm font-medium">로그인</button>
+      <p id="loginError" class="text-red-500 text-xs text-center" style="display:none"></p>
+    </div>
+  </div>
+
+  <!-- ── 관리 화면 ── -->
+  <div id="adminView" style="display:none">
+    <div class="flex items-center justify-between mb-5">
+      <h1 class="text-xl font-semibold">갤러리 관리</h1>
+      <button id="logoutBtn" class="text-sm text-stone-500 underline">로그아웃</button>
+    </div>
+
+    <!-- 업로드 -->
+    <div class="bg-white rounded-2xl shadow-sm p-5 mb-5">
+      <label class="block text-sm font-medium mb-2">사진 추가</label>
+      <input id="fileInput" type="file" accept="image/*" multiple
+             class="block w-full text-sm text-stone-600
+                    file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0
+                    file:bg-stone-800 file:text-white file:text-sm" />
+      <p class="text-xs text-stone-400 mt-2">휴대폰에서 앨범/카메라로 여러 장 선택 가능. 업로드 시 자동으로 용량을 줄입니다.</p>
+    </div>
+
+    <!-- 진행 상태 -->
+    <div id="status" class="text-sm text-center text-stone-600 mb-4" style="display:none"></div>
+
+    <!-- 사진 목록 -->
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="text-sm font-medium text-stone-500">업로드한 사진 (<span id="count">0</span>)</h2>
+      <button id="clearAllBtn" class="text-xs text-red-400 underline" style="display:none">전체 삭제</button>
+    </div>
+    <p class="text-xs text-stone-400 mb-3">기본 사진(resources)은 청첩장에 항상 표시되며, 여기서 업로드한 사진이 그 뒤에 이어집니다.</p>
+    <div id="list" class="space-y-2"></div>
+    <p id="empty" class="text-center text-stone-400 text-sm py-10" style="display:none">아직 업로드한 사진이 없습니다.</p>
+  </div>
+
+</div>
+
+<script>
+  const loginView = document.getElementById('loginView');
+  const adminView = document.getElementById('adminView');
+  const statusEl  = document.getElementById('status');
+  const listEl    = document.getElementById('list');
+  const emptyEl   = document.getElementById('empty');
+  const countEl   = document.getElementById('count');
+
+  let photos = [];
+
+  function setStatus(msg, busy) {
+    if (!msg) { statusEl.style.display = 'none'; return; }
+    statusEl.style.display = '';
+    statusEl.innerHTML = (busy ? '<span class="inline-block spin">⏳</span> ' : '') + msg;
+  }
+
+  // ── 인증 상태 ──
+  auth.onAuthStateChanged(function (user) {
+    if (user) {
+      loginView.style.display = 'none';
+      adminView.style.display = '';
+      renderList();
+    } else {
+      adminView.style.display = 'none';
+      loginView.style.display = '';
+    }
+  });
+
+  // ── 로그인 ──
+  const loginBtn = document.getElementById('loginBtn');
+  const loginError = document.getElementById('loginError');
+  function doLogin() {
+    loginError.style.display = 'none';
+    const email = document.getElementById('email').value.trim();
+    const pw = document.getElementById('password').value;
+    loginBtn.disabled = true;
+    auth.signInWithEmailAndPassword(email, pw)
+      .catch(function (e) {
+        loginError.textContent = '로그인 실패: 이메일 또는 비밀번호를 확인하세요.';
+        loginError.style.display = '';
+        console.error(e);
+      })
+      .finally(function () { loginBtn.disabled = false; });
+  }
+  loginBtn.addEventListener('click', doLogin);
+  document.getElementById('password').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // ── 로그아웃 ──
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    auth.signOut();
+  });
+
+  // ── 이미지 리사이즈/압축 ──
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function (e) { URL.revokeObjectURL(url); reject(e); };
+      img.src = url;
+    });
+  }
+  async function compress(file, maxDim, quality) {
+    maxDim = maxDim || 1280; quality = quality || 0.75;
+    const img = await loadImage(file);
+    let w = img.naturalWidth, h = img.naturalHeight;
+    if (w > maxDim || h > maxDim) {
+      if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    return await new Promise(function (res) { canvas.toBlob(res, 'image/jpeg', quality); });
+  }
+
+  // Firestore 문서 한도(1MiB) 내에 들어가도록 압축. base64는 ~33% 커지므로
+  // 원본 blob을 ~700KB 이하로 맞춘다.
+  async function compressToLimit(file) {
+    const MAX = 700 * 1024;
+    let maxDim = 1280, quality = 0.75;
+    let blob = await compress(file, maxDim, quality);
+    while (blob.size > MAX && quality > 0.4) {
+      quality -= 0.1;
+      blob = await compress(file, maxDim, quality);
+    }
+    while (blob.size > MAX && maxDim > 800) {
+      maxDim -= 160;
+      blob = await compress(file, maxDim, 0.6);
+    }
+    return blob;
+  }
+
+  function blobToDataURL(blob) {
+    return new Promise(function (res, rej) {
+      const r = new FileReader();
+      r.onload = function () { res(r.result); };
+      r.onerror = rej;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  // ── 저장 헬퍼 ── (사진을 Firestore 문서에 data URL로 직접 저장)
+  async function nextOrder() {
+    const snap = await db.collection('gallery').orderBy('order', 'desc').limit(1).get();
+    return snap.empty ? 0 : (snap.docs[0].data().order + 1);
+  }
+  async function addImage(file, order) {
+    const blob = await compressToLimit(file);
+    const dataUrl = await blobToDataURL(blob);
+    const id = db.collection('gallery').doc().id;
+    await db.collection('gallery').doc(id).set({
+      url: dataUrl,
+      order: order,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  // ── 업로드 ──
+  document.getElementById('fileInput').addEventListener('change', async function (e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    let order = await nextOrder();
+    try {
+      for (let i = 0; i < files.length; i++) {
+        setStatus('업로드 중... (' + (i + 1) + '/' + files.length + ')', true);
+        await addImage(files[i], order++);
+      }
+      setStatus('업로드 완료 ✓');
+      setTimeout(function () { setStatus(''); }, 1500);
+    } catch (err) {
+      console.error(err);
+      setStatus('업로드 실패: ' + err.message);
+    }
+    e.target.value = '';
+    await renderList();
+  });
+
+  // ── 전체 삭제 ──
+  document.getElementById('clearAllBtn').addEventListener('click', async function () {
+    if (!photos.length) return;
+    if (!confirm('업로드한 사진 ' + photos.length + '장을 모두 삭제할까요? (기본 사진은 영향 없음)')) return;
+    setStatus('전체 삭제 중...', true);
+    try {
+      // 한 배치 최대 500개 — 나눠서 처리
+      for (let i = 0; i < photos.length; i += 400) {
+        const batch = db.batch();
+        photos.slice(i, i + 400).forEach(function (p) {
+          batch.delete(db.collection('gallery').doc(p.id));
+        });
+        await batch.commit();
+      }
+      setStatus('');
+    } catch (err) {
+      console.error(err);
+      setStatus('전체 삭제 실패: ' + err.message);
+    }
+    await renderList();
+  });
+
+  // ── 삭제 ──
+  async function deletePhoto(p) {
+    if (!confirm('이 사진을 삭제할까요?')) return;
+    setStatus('삭제 중...', true);
+    try {
+      await db.collection('gallery').doc(p.id).delete();
+      setStatus('');
+    } catch (err) {
+      console.error(err);
+      setStatus('삭제 실패: ' + err.message);
+    }
+    await renderList();
+  }
+
+  // ── 순서변경 (인접 항목과 order 교환) ──
+  async function move(index, dir) {
+    const a = photos[index], b = photos[index + dir];
+    if (!a || !b) return;
+    setStatus('순서 변경 중...', true);
+    const batch = db.batch();
+    batch.update(db.collection('gallery').doc(a.id), { order: b.order });
+    batch.update(db.collection('gallery').doc(b.id), { order: a.order });
+    await batch.commit();
+    setStatus('');
+    await renderList();
+  }
+
+  // ── 목록 렌더링 ──
+  async function renderList() {
+    photos = await fetchGallery();
+    countEl.textContent = photos.length;
+    listEl.innerHTML = '';
+    emptyEl.style.display = photos.length ? 'none' : '';
+    document.getElementById('clearAllBtn').style.display = photos.length ? '' : 'none';
+    photos.forEach(function (p, i) {
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-3 bg-white rounded-xl shadow-sm p-2';
+      row.innerHTML =
+        '<img src="' + p.url + '" class="w-16 h-20 object-cover rounded-lg flex-shrink-0" />' +
+        '<span class="text-xs text-stone-400 w-6 text-center">' + (i + 1) + '</span>' +
+        '<div class="flex-1"></div>' +
+        '<div class="flex flex-col gap-1">' +
+          '<button data-act="up" class="px-2 py-1 text-stone-600 border border-stone-200 rounded text-sm leading-none">▲</button>' +
+          '<button data-act="down" class="px-2 py-1 text-stone-600 border border-stone-200 rounded text-sm leading-none">▼</button>' +
+        '</div>' +
+        '<button data-act="del" class="px-3 py-2 text-red-500 text-sm">삭제</button>';
+      row.querySelector('[data-act="up"]').addEventListener('click', function () { move(i, -1); });
+      row.querySelector('[data-act="down"]').addEventListener('click', function () { move(i, 1); });
+      row.querySelector('[data-act="del"]').addEventListener('click', function () { deletePhoto(p); });
+      listEl.appendChild(row);
+    });
+  }
+</script>
+</body>
+</html>

@@ -15,6 +15,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Allura&family=Noto+Serif+KR&family=Playfair+Display&family=IBM+Plex+Sans+KR:wght@300&family=Gowun+Batang&display=swap" rel="stylesheet">
   <!-- Tailwind (Play CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase SDK (compat) — 갤러리 사진 로드용 -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
   <style>
     html { scroll-behavior: smooth; }
     table td { height: 40px; vertical-align: middle; }
@@ -249,16 +253,7 @@
       <span class="w-16"></span>
     </div>
     <div class="px-3 pb-10 grid grid-cols-2 gap-2" id="galleryGrid">
-      <img onclick="openLightbox(0)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic1.jpg" alt="gallery1"/>
-      <img onclick="openLightbox(1)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic1-2.jpg" alt="gallery1-2"/>
-      <img onclick="openLightbox(2)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic2.jpg" alt="gallery2"/>
-      <img onclick="openLightbox(3)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic3.jpg" alt="gallery3"/>
-      <img onclick="openLightbox(4)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic4.jpg" alt="gallery4"/>
-      <img onclick="openLightbox(5)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic5.jpg" alt="gallery5"/>
-      <img onclick="openLightbox(6)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic6.jpg" alt="gallery6"/>
-      <img onclick="openLightbox(7)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic6-5.jpg" alt="gallery6-5"/>
-      <img onclick="openLightbox(8)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic7-2.jpg" alt="gallery7"/>
-      <img onclick="openLightbox(9)" class="rounded-lg object-cover aspect-[4/5] w-full cursor-pointer" src="resources/pic8.jpg" alt="gallery8"/>
+      <!-- 사진은 Firestore에서 동적으로 채워집니다 (renderGallery) -->
     </div>
   </div>
 </div>
@@ -409,6 +404,7 @@
     galleryOverlay.className = 'fixed inset-0 z-[100] bg-stone-50 overflow-y-auto open';
     document.body.style.overflow = 'hidden';
     galleryOverlay.scrollTop = 0;
+    if (!galleryLoaded) { galleryLoaded = true; renderGallery(); }
   }
 
   function closeGallery() {
@@ -423,19 +419,51 @@
     });
   }
 
+  // ── Gallery photos ──
+  // 갤러리는 Firestore(관리 페이지에서 관리하는 목록)를 그대로 보여준다. 단일 소스.
+  let galleryPhotos = [];
+
+  function paintGrid(urls) {
+    const grid = document.getElementById('galleryGrid');
+    galleryPhotos = urls;
+    grid.innerHTML = '';
+    urls.forEach(function (url, i) {
+      const img = document.createElement('img');
+      img.className = 'rounded-lg object-cover aspect-[4/5] w-full cursor-pointer';
+      img.src = url;
+      img.alt = 'gallery' + (i + 1);
+      img.loading = 'lazy';
+      img.addEventListener('click', function () { openLightbox(i); });
+      grid.appendChild(img);
+    });
+  }
+
+  async function renderGallery() {
+    const notice = document.getElementById('galleryNotice');
+    const noticeText = notice ? notice.querySelector('span:last-child') : null;
+    if (noticeText) noticeText.textContent = '사진 불러오는 중 ...';
+    if (notice) notice.style.display = '';
+    try {
+      const items = await fetchGallery();
+      paintGrid(items.map(function (it) { return it.url; }));
+      if (galleryPhotos.length) {
+        if (notice) notice.style.display = 'none';
+      } else {
+        if (noticeText) noticeText.textContent = '사진 준비 중 ...';
+        if (notice) notice.style.display = '';
+      }
+    } catch (err) {
+      console.error('갤러리 로드 실패:', err);
+      galleryLoaded = false; // 다음에 다시 열면 재시도
+      if (noticeText) noticeText.textContent = '사진을 불러오지 못했습니다';
+      if (notice) notice.style.display = '';
+    }
+  }
+
+  // 갤러리는 처음 열 때 한 번만 로드한다 (사진 데이터가 크므로 페이지 로드 시 미리 받지 않음)
+  let galleryLoaded = false;
+
   // ── Lightbox ──
-  const galleryPhotos = [
-    'resources/pic1.jpg',
-    'resources/pic1-2.jpg',
-    'resources/pic2.jpg',
-    'resources/pic3.jpg',
-    'resources/pic4.jpg',
-    'resources/pic5.jpg',
-    'resources/pic6.jpg',
-    'resources/pic6-5.jpg',
-    'resources/pic7-2.jpg',
-    'resources/pic8.jpg'
-  ];
   let currentPhoto = 0;
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
